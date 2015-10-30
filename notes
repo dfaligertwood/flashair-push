@@ -1,0 +1,2 @@
+* The on-write call provides no information about the file that was written.
+
