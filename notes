@@ -1,2 +1,9 @@
 * The on-write call provides no information about the file that was written.
+* io.popen() is not available.
+* fa.ReadStatusReg() is an undocumented status function.
+  - bytes 13-16 gives information about wifi status.
+    - 0xb000 → "connect" (something is connected)
+    - 0x3000 ?→ "available" (no connected clients)
+    - bit 0 flagged → "bridge mode"
+    - bit 12 flagged → "AP mode"
 
