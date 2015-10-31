@@ -3,7 +3,7 @@ errorFilePath   = "/lua/failed_files.txt"
 bufferFilePath  = "/lua/unsent_files.txt"
 newestFilePath  = "/lua/newest_file.txt"
 serverUrl       = "http://192.168.0.11:8080"
-watchFolder     = "/DCIM/101_CANON/"
+watchFolder     = "/DCIM/101_CANON"
 
 
 function httpSuccess(code)
@@ -51,7 +51,7 @@ function checkDir()
   end
 
   for file in lfs.dir(watchFolder) do
-    local filePath = watchFolder..file
+    local filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
     if fileModDate and fileModDate > newestFileDate then
       local f = io.open(newestFilePath, 'w+')
