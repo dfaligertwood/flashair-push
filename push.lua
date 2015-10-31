@@ -6,12 +6,12 @@ serverUrl       = "http://192.168.0.11:8080"
 watchFolder     = "/DCIM/101_CANON"
 
 
-function httpSuccess(code)
+local function httpSuccess(code)
   local firstNum = string.sub(code, 1, 1)
   return (firstNum == '2' or firstNum == '1')
 end
 
-function sendFile(filePath)
+local function sendFile(filePath)
   local filesize = lfs.attributes(filePath, "size")
 
   if filesize then
@@ -33,13 +33,13 @@ function sendFile(filePath)
   end
 end
 
-function sendFiles(filePaths)
+local function sendFiles(filePaths)
   for i = 1, #filePaths do
     sendFile(filePaths[i])
   end
 end
 
-function checkDir()
+local function checkDir()
   local f = io.open(newestFilePath)
   local newestFileDate = 0
 
@@ -57,20 +57,24 @@ function checkDir()
     filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
     print(fileModDate)
-    if fileModDate and fileModDate > newestFileDate then
-      local f = io.open(newestFilePath, 'w+')
-      f:write(filePath)
-      f:close()
-      newFile = filePath
+    if fileModDate and (fileModDate > newestFileDate) then
       break
+    else
+      filePath = nil
     end
+  end
+
+  if filePath then
+    local f = io.open(newestFilePath, 'w+')
+    f:write(filePath)
+    f:close()
   end
 
   collectgarbage()
   return newFile
 end
 
-function bufferedFiles(newFile)
+local function bufferedFiles(newFile)
   local t = {}
   for f in io.lines(bufferFile) do
     if f then table.insert(t, f) end
