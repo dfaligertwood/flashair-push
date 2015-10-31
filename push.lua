@@ -57,7 +57,7 @@ local function checkDir()
   for file in lfs.dir(watchFolder) do
     filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
-    if ((fileModDate) and (fileModDate > newestFileDate)) then
+    if ((fileModDate) and (newestFileDate) and (fileModDate > newestFileDate)) then
       break
     else
       filePath = nil
