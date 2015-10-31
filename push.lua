@@ -41,14 +41,13 @@ end
 
 function checkDir()
   local f = io.open(newestFilePath)
+  local newestFileDate = 0
   if f then
     local newestFile = f:read()
     f:close()
     if newestFile then
-      local newestFileDate = lfs.attributes(newestFile, 'modification')
+      newestFileDate = lfs.attributes(newestFile, 'modification')
     end
-  else
-    newestFileDate = 0
   end
 
   for file in lfs.dir(watchFolder) do
