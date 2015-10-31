@@ -71,7 +71,7 @@ local function checkDir()
   end
 
   collectgarbage()
-  return newFile
+  return filePath
 end
 
 local function bufferedFiles(newFile)
