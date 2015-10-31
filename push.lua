@@ -53,6 +53,8 @@ function checkDir()
   for file in lfs.dir(watchFolder) do
     local filePath = watchFolder..file
     local fileModDate = lfs.attributes(filePath, 'modification')
+    print(fileModDate)
+    print(filePath)
     if fileModDate and fileModDate > newestFileDate then
       local f = io.open(newestFilePath, 'w+')
       f:write(filePath)
