@@ -42,6 +42,7 @@ end
 function checkDir()
   local f = io.open(newestFilePath)
   local newestFileDate = 0
+
   if f then
     local newestFile = f:read()
     f:close()
@@ -50,25 +51,31 @@ function checkDir()
     end
   end
 
+  collectgarbage()
+  local filePath = nil
+
   for file in lfs.dir(watchFolder) do
-    local filePath = watchFolder..'/'..file
+    filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
     print(fileModDate)
     if fileModDate and fileModDate > newestFileDate then
       local f = io.open(newestFilePath, 'w+')
       f:write(filePath)
       f:close()
-      return filePath
+      break
+    else
+      filePath = nil
     end
   end
 
-  return nil
+  collectgarbage()
+  return filePath
 end
 
 function bufferedFiles(newFile)
   local t = {}
   for f in io.lines(bufferFile) do
-    table.insert(t, f)
+    if f then table.insert(t, f) end
   end
   table.insert(t, newFile)
   io.open(bufferFile, 'w+'):close()
