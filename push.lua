@@ -1,102 +1,54 @@
-logFilePath     = "/lua/sent_files.txt"
-errorFilePath   = "/lua/failed_files.txt"
-bufferFilePath  = "/lua/unsent_files.txt"
-newestFilePath  = "/lua/newest_file.txt"
-serverUrl       = "http://192.168.0.11:8080"
-watchFolder     = "/DCIM/101_CANON"
-
+serverUrl   = "http://192.168.0.11/"
+watchFolder = "/DCIM/101CANON"
+watchExt    = "JPG"
 
 local function httpSuccess(code)
   local firstNum = string.sub(code, 1, 1)
   return (firstNum == '2' or firstNum == '1')
 end
 
-local function sendFile(filePath)
+local function sendFile(fileName)
+  local filePath = watchFolder .. "/" .. fileName
   local filesize = lfs.attributes(filePath, "size")
 
   if filesize then
-    local body, code, header = fa.request { url = serverPath
-                                          , method = "PUT"
-                                          , headers = {["Content-Length"] = filesize}
-                                          , file = filePath
-                                          }
+    local serverPath = serverUrl .. fileName
+    print(fileName .. " -> " .. serverPath)
+    body, code, header = fa.request { url = serverPath
+                                    , method = "PUT"
+                                    , headers = {["Content-Length"] = filesize}
+                                    , file = filePath
+                                    , bufsize = 1460*10
+                                    }
     if httpSuccess(code) then
-      logFile:write(filePath)
-      logFile:flush()
+      print("UPLOADED " .. filePath)
     else
-      errorFile:write(filePath..' Code: '..code..'\n')
-      errorFile:flush()
+      print("FAILED " .. filePath)
     end
-  else
-    errorFile:write(filePath..' does not exist.'..'\n')
-    errorFile:flush()
   end
 
   collectgarbage()
-end
-
-local function sendFiles(filePaths)
-  for i = 1, #filePaths do
-    sendFile(filePaths[i])
-  end
 end
 
 local function checkDir()
-  local f = io.open(newestFilePath)
   local newestFileDate = 0
+  local newestFilePath = nil
 
-  if f then
-    local newestFile = f:read()
-    f:close()
-    if newestFile then
-      newestFileDate = lfs.attributes(newestFile, 'modification')
-    end
-  end
-
-  local filePath = nil
   for file in lfs.dir(watchFolder) do
-    filePath = watchFolder..'/'..file
-    local fileModDate = lfs.attributes(filePath, 'modification')
-    if ((fileModDate) and (newestFileDate) and (fileModDate > newestFileDate)) then
-      break
-    else
-      filePath = nil
+    local filePath = watchFolder..'/'..file
+    local fileDate = lfs.attributes(filePath, 'modification')
+    local fileExt  = string.sub(filePath, -3)
+    if ((fileDate) and (fileDate > newestFileDate) and (watchExt == fileExt)) then
+      newestFileDate = fileDate
+      newestFileName = file
     end
   end
 
-  if filePath then
-    local f = io.open(newestFilePath, 'w+')
-    f:write(filePath)
-    f:close()
-  end
-
   collectgarbage()
-  return filePath
+  return newestFileName
 end
 
-local function bufferedFiles(newFile)
-  local t = {}
-  for f in io.lines(bufferFile) do
-    if f then table.insert(t, f) end
-  end
-  table.insert(t, newFile)
-  io.open(bufferFile, 'w+'):close()
-  collectgarbage()
-  return t
-end
-
-local newFile = checkDir()
-if newFile then
-  local res = fa.ReadStatusReg()
-  if (string.sub(res, 13, 13) == "b") then
-    logFile   = io.open(logFilePath, 'a+')
-    errorFile = io.open(errorFilePath, 'a+')
-    sendFiles(bufferedFiles(newFile))
-    logFile:close()
-    errorFile:close()
-  else
-    local bufferFile = io.open(bufferFilePath, 'a+')
-    bufferFile:write(newFile..'\n')
-    bufferFile:close()
-  end
+local res = fa.ReadStatusReg()
+if (string.sub(res, 13, 13) == "b") then
+  sendFile(checkDir())
 end
