@@ -40,7 +40,6 @@ function sendFiles(filePaths)
 end
 
 function checkDir()
-  local directory = lfs.dir(watchFolder)
   local f = io.open(newestFilePath)
   if f then
     local newestFile = f:read()
@@ -52,7 +51,7 @@ function checkDir()
     newestFileDate = 0
   end
 
-  for file in directory do
+  for file in lfs.dir(watchFolder) do
     local filePath = watchFolder..file
     local fileModDate = lfs.attributes(filePath, 'modification')
     if fileModDate > newestFileDate then
