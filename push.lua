@@ -31,6 +31,8 @@ local function sendFile(filePath)
     errorFile:write(filePath..' does not exist.'..'\n')
     errorFile:flush()
   end
+
+  collectgarbage()
 end
 
 local function sendFiles(filePaths)
@@ -55,10 +57,7 @@ local function checkDir()
   for file in lfs.dir(watchFolder) do
     filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
-    print(fileModDate)
-    print(newestFileDate)
     if ((fileModDate) and (fileModDate > newestFileDate)) then
-      print('yay')
       break
     else
       filePath = nil
@@ -82,11 +81,11 @@ local function bufferedFiles(newFile)
   end
   table.insert(t, newFile)
   io.open(bufferFile, 'w+'):close()
+  collectgarbage()
   return t
 end
 
 local newFile = checkDir()
-print(newFile)
 if newFile then
   local res = fa.ReadStatusReg()
   if (string.sub(res, 13, 13) == "b") then
