@@ -57,6 +57,7 @@ local function checkDir()
     local fileModDate = lfs.attributes(filePath, 'modification')
     print(fileModDate)
     if fileModDate and (fileModDate > newestFileDate) then
+      print('yay')
       break
     else
       filePath = nil
