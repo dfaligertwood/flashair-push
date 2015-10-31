@@ -56,7 +56,8 @@ local function checkDir()
     filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
     print(fileModDate)
-    if fileModDate and (fileModDate > newestFileDate) then
+    print(newestFileDate)
+    if ((fileModDate) and (fileModDate > newestFileDate)) then
       print('yay')
       break
     else
