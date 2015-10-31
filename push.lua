@@ -51,9 +51,8 @@ function checkDir()
     end
   end
 
-  collectgarbage()
   local filePath = nil
-
+  local newFile = nil
   for file in lfs.dir(watchFolder) do
     filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
@@ -62,14 +61,13 @@ function checkDir()
       local f = io.open(newestFilePath, 'w+')
       f:write(filePath)
       f:close()
+      newFile = filePath
       break
-    else
-      filePath = nil
     end
   end
 
   collectgarbage()
-  return filePath
+  return newFile
 end
 
 function bufferedFiles(newFile)
