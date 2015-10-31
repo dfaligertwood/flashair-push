@@ -75,6 +75,7 @@ function bufferedFiles(newFile)
 end
 
 local newFile = checkDir()
+print(newFile)
 if newFile then
   local res = fa.ReadStatusReg()
   if (string.sub(res, 13, 13) == "b") then
