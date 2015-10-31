@@ -52,7 +52,6 @@ local function checkDir()
   end
 
   local filePath = nil
-  local newFile = nil
   for file in lfs.dir(watchFolder) do
     filePath = watchFolder..'/'..file
     local fileModDate = lfs.attributes(filePath, 'modification')
