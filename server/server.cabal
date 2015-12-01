@@ -1,16 +1,16 @@
-Name:                server
+Name:                flashair-receive
 Version:             0.1
-Synopsis:            Project Synopsis Here
-Description:         Project Description Here
+Synopsis:            Server for the flashair-push utility
+Description:         Receives a path from remote server and attempts to download.
 License:             AllRightsReserved
-Author:              Author
-Maintainer:          maintainer@example.com
+Author:              D F A Ligertwood
+Maintainer:          douglas@dfal.xyz
 Stability:           Experimental
 Category:            Web
 Build-type:          Simple
 Cabal-version:       >=1.2
 
-Executable server
+Executable flashair-receive
   hs-source-dirs: src
   main-is: Main.hs
 
