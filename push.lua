@@ -7,24 +7,21 @@ local function httpSuccess(code)
   return (firstNum == '2' or firstNum == '1')
 end
 
-local function sendFile(fileName)
+local function sendFileName(fileName)
   local filePath = watchFolder .. "/" .. fileName
-  local filesize = lfs.attributes(filePath, "size")
-
-  if filesize then
-    local serverPath = serverUrl .. fileName
-    print(fileName .. " -> " .. serverPath)
-    body, code, header = fa.request { url = serverPath
-                                    , method = "PUT"
-                                    , headers = {["Content-Length"] = filesize}
-                                    , file = filePath
-                                    , bufsize = 1460*10
-                                    }
-    if httpSuccess(code) then
-      print("UPLOADED " .. filePath)
-    else
-      print("FAILED " .. filePath)
-    end
+  local message = cjson.encode({ file = filePath })
+  print(fileName .. "->" .. serverUrl)
+  body, code, header = fa.request { url = serverUrl
+                                  , method = "POST"
+                                  , headers = { ["Content-Length"] = string.len(message)
+                                              , ["Content-Type"] = "application/json"
+                                              }
+                                  , body = message
+                                  }
+  if httpSuccess(code) then
+    print("SENT " .. filePath)
+  else
+    print("FAILED " .. filePath)
   end
 
   collectgarbage()
@@ -50,5 +47,5 @@ end
 
 local res = fa.ReadStatusReg()
 if (string.sub(res, 13, 13) == "b") then
-  sendFile(checkDir())
+  sendFileName(checkDir())
 end
