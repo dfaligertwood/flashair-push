@@ -1,0 +1,6 @@
+*sandbox*
+server/*.JPG
+server/dist
+server/log
+server/*.eventlog
+server/.ghci
