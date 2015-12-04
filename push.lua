@@ -7,10 +7,9 @@ local function httpSuccess(code)
   return (firstNum == '2' or firstNum == '1')
 end
 
-local function sendFileName(fileName)
-  local filePath = watchFolder .. "/" .. fileName
+local function sendFileName(filePath)
   local message = cjson.encode({ file = filePath })
-  print(fileName .. "->" .. serverUrl)
+  print(filePath .. "->" .. serverUrl)
   body, code, header = fa.request { url = serverUrl
                                   , method = "POST"
                                   , headers = { ["Content-Length"] = string.len(message)
@@ -29,7 +28,6 @@ end
 
 local function checkDir()
   local newestFileDate = 0
-  local newestFilePath = nil
 
   for file in lfs.dir(watchFolder) do
     local filePath = watchFolder..'/'..file
@@ -37,12 +35,12 @@ local function checkDir()
     local fileExt  = string.sub(filePath, -3)
     if ((fileDate) and (fileDate > newestFileDate) and (watchExt == fileExt)) then
       newestFileDate = fileDate
-      newestFileName = file
+      newestFilePath = filePath
     end
   end
 
   collectgarbage()
-  return newestFileName
+  return newestFilePath
 end
 
 local res = fa.ReadStatusReg()
