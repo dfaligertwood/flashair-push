@@ -34,8 +34,12 @@ import           System.FilePath
 
 --------------------------------------------------------------------------------
 
-data File = File { file :: String } deriving (Generic)
+data File = File { file :: FilePath
+                 , mod_date :: Integer
+                 } deriving (Generic)
 instance FromJSON File where
+
+type Request = (ByteString, [File])
 
 --------------------------------------------------------------------------------
 
@@ -45,14 +49,14 @@ main = do
     race_ (download downloadQueue)
           (quickHttpServe $ site downloadQueue)
 
-site :: TChan (ByteString, File) -> Snap ()
+site :: TChan Request -> Snap ()
 site q = ifTop . method POST $ do
     payload <- reqJSON
     remote <- getsRequest rqRemoteAddr
     _ <- liftIO . atomically $ writeTChan q (remote, payload)
     return ()
 
-download :: TChan (ByteString, File) -> IO ()
+download :: TChan Request -> IO ()
 download q = forever $ do
     (u, f) <- atomically $ do
         (ip, f) <- readTChan q
