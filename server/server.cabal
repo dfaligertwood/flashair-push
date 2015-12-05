@@ -15,19 +15,19 @@ Executable flashair-receive
   main-is: Main.hs
 
   Build-depends:
+    aeson                     >= 0.10  && < 0.11,
+    async                     >= 2.0   && < 2.1,
     base                      >= 4     && < 5,
     bytestring                >= 0.9.1 && < 0.11,
+    filepath                  >= 1.4   && < 1.5,
+    http-conduit              >= 2.1   && < 2.2,
     MonadCatchIO-transformers >= 0.2.1 && < 0.4,
     mtl                       >= 2     && < 3,
     snap-core                 >= 0.9   && < 0.10,
     snap-server               >= 0.9   && < 0.10,
     snap-extras               >= 0.11  && < 0.12,
-    async                     >= 2.0   && < 2.1,
-    aeson                     >= 0.10  && < 0.11,
-    transformers              >= 0.4   && < 0.5,
     stm                       >= 2.4   && < 2.5,
-    http-conduit              >= 2.1   && < 2.2,
-    filepath                  >= 1.4   && < 1.5,
+    transformers              >= 0.4   && < 0.5,
     unix                      >= 2.7   && < 2.8
 
   if impl(ghc >= 6.12.0)
