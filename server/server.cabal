@@ -27,7 +27,8 @@ Executable flashair-receive
     transformers              >= 0.4   && < 0.5,
     stm                       >= 2.4   && < 2.5,
     http-conduit              >= 2.1   && < 2.2,
-    filepath                  >= 1.4   && < 1.5
+    filepath                  >= 1.4   && < 1.5,
+    unix                      >= 2.7   && < 2.8
 
   if impl(ghc >= 6.12.0)
     ghc-options: -threaded -Wall -fwarn-tabs -funbox-strict-fields -O2

@@ -13,7 +13,8 @@ import           Control.Concurrent.STM
   , readTChan
   , writeTChan )
 import           Control.Monad
-  ( forever )
+  ( forever
+  , filterM )
 import           Control.Monad.IO.Class
   ( liftIO )
 import           Data.Aeson
@@ -30,16 +31,23 @@ import           Snap.Core
 import           Snap.Http.Server
 import           Snap.Extras.JSON
 import           System.FilePath
-  ( takeFileName )
+  ( takeFileName 
+  , takeExtension )
+import           System.Posix.Files
+  ( fileExist )
 
 --------------------------------------------------------------------------------
 
 data File = File { file :: FilePath
-                 , mod_date :: Integer
+                 , modDate :: Integer
                  } deriving (Generic)
 instance FromJSON File where
 
-type Request = (ByteString, [File])
+type UploadRequests = (ByteString, [File])
+type UploadRequest = (ByteString, File)
+
+downloadExtension :: File -> Bool
+downloadExtension = (== ".JPG") . takeExtension . file
 
 --------------------------------------------------------------------------------
 
@@ -49,20 +57,29 @@ main = do
     race_ (download downloadQueue)
           (quickHttpServe $ site downloadQueue)
 
-site :: TChan Request -> Snap ()
+site :: TChan UploadRequests -> Snap ()
 site q = ifTop . method POST $ do
     payload <- reqJSON
     remote <- getsRequest rqRemoteAddr
     _ <- liftIO . atomically $ writeTChan q (remote, payload)
     return ()
 
-download :: TChan Request -> IO ()
+download :: TChan UploadRequests -> IO ()
 download q = forever $ do
-    (u, f) <- atomically $ do
-        (ip, f) <- readTChan q
-        let fileName = file f
-        let url = "http://" ++ unpack ip ++ fileName
-        return (url, fileName)
-    putStrLn $ "Downloading " ++ f
-    simpleHttp u >>= B.writeFile (takeFileName f)
-    putStrLn $ "Finished " ++ f
+    all_requests <- atomically $ do
+        (ip, fs) <- readTChan q
+        return $ zip (repeat ip) fs
+    filtered_requests <- filterM selectRequests all_requests
+    mapM_ makeRequest filtered_requests
+  where
+    makeRequest :: UploadRequest -> IO ()
+    makeRequest (ip, f) = do
+      let fileName = file f
+      let url = "http://" ++ unpack ip ++ fileName
+      putStrLn $ "Downloading " ++ fileName
+      simpleHttp url >>= B.writeFile (takeFileName fileName)
+      putStrLn $ "Finished " ++ fileName
+    selectRequests :: UploadRequest -> IO Bool
+    selectRequests (_, f)
+      = (&& downloadExtension f)
+      <$> (fileExist . takeFileName $ file f)
