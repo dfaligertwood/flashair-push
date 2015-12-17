@@ -31,8 +31,11 @@ import           Snap.Core
 import           Snap.Http.Server
 import           Snap.Extras.JSON
 import           System.FilePath
-  ( takeFileName 
+  ( takeFileName
   , takeExtension )
+import           System.Process
+  ( ProcessHandle
+  , spawnProcess )
 import           System.Posix.Files
   ( fileExist )
 
@@ -48,6 +51,9 @@ type UploadRequest = (ByteString, File)
 
 downloadExtension :: File -> Bool
 downloadExtension = (== ".JPG") . takeExtension . file
+
+onDownload :: FilePath -> IO ProcessHandle
+onDownload f = spawnProcess "/usr/bin/open" ["-a LilyView", takeFileName f]
 
 --------------------------------------------------------------------------------
 
@@ -65,12 +71,12 @@ site q = ifTop . method POST $ do
     return ()
 
 download :: TChan UploadRequests -> IO ()
-download q = forever $ do
-    all_requests <- atomically $ do
-        (ip, fs) <- readTChan q
-        return $ zip (repeat ip) fs
-    filtered_requests <- filterM selectRequests all_requests
-    mapM_ makeRequest filtered_requests
+download q = forever $
+    atomically
+      (do (ip, fs) <- readTChan q
+          return $ zip (repeat ip) fs)
+    >>= filterM selectRequests
+    >>= mapM_ makeRequest
   where
     makeRequest :: UploadRequest -> IO ()
     makeRequest (ip, f) = do
@@ -78,6 +84,7 @@ download q = forever $ do
       let url = "http://" ++ unpack ip ++ fileName
       putStrLn $ "Downloading " ++ fileName
       simpleHttp url >>= B.writeFile (takeFileName fileName)
+      _ <- onDownload fileName
       putStrLn $ "Finished " ++ fileName
     selectRequests :: UploadRequest -> IO Bool
     selectRequests (_, f)
